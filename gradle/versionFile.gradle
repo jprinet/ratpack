@@ -15,7 +15,7 @@
  */
 
 task writeVersionNumberFile {
-  def versionFile = file("src/main/resources/ratpack/ratpack-version.txt")
+  def versionFile = file("src/main/resources/ratpack/ratpack-version.txt") //file("build/ratpack/ratpack-version.txt")
   inputs.property "version", project.version
   outputs.file versionFile
 
@@ -33,3 +33,4 @@ plugins.withType(EclipsePlugin) {
 plugins.withType(IdeaPlugin) {
   ideaModule.dependsOn writeVersionNumberFile
 }
+

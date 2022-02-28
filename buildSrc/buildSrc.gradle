@@ -37,6 +37,6 @@ dependencies {
 sourceSets {
   main {
     java.srcDir("../ratpack-gradle/src/main/java")
-    //resources.srcDir("../ratpack-gradle/src/main/resources")
+    resources.srcDir("../ratpack-gradle/src/main/resources")
   }
 }
