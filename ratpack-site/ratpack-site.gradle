@@ -236,7 +236,8 @@ task configureWriteTestConfig {
   doLast {
     if (!isSnapCi) {
       writeTestConfig.testProperties.putAll(
-        "chromedriver.path": fileTree(unzipChromeDriver.outputs.files.singleFile).singleFile.absolutePath
+        //"chromedriver.path": fileTree(unzipChromeDriver.outputs.files.singleFile).singleFile.absolutePath
+        "chromedriver.path": project.getProjectDir().toURI().relativize(unzipChromeDriver.outputs.files.singleFile.toURI()).toString() + fileTree(unzipChromeDriver.outputs.files.singleFile).singleFile.name
       )
     }
   }
