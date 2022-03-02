@@ -180,6 +180,12 @@ test {
   systemProperty "gradleHome", gradle.gradleHomeDir.absolutePath
 }
 
+//tasks.withType(Test).configureEach { t ->
+//  doFirst {
+//    t.systemProperties.forEach { key, val -> buildScan.value("${t.identityPath}#sysProps-$key", val.toString()) }
+//  }
+//}
+
 task checkApi(type: Checkstyle) {
   group "manual"
   description "Tests that the public API is sufficiently documented"
