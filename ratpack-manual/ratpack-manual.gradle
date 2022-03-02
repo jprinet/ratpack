@@ -169,22 +169,46 @@ task api(type: Javadoc) {
   }
 }
 
+class TestEnvironmentProvider implements CommandLineArgumentProvider {
+  @Internal
+  def project
+
+  TestEnvironmentProvider(project){
+    this.project = project
+  }
+
+  @Override
+  Iterable<String> asArguments() {
+    ["-DlocalRepo=" + project.file("build/localrepo")]
+  }
+}
+
+tasks.named('test') {
+  jvmArgumentProviders.add(
+    new TestEnvironmentProvider(rootProject)
+  )
+}
+
 test {
   dependsOn ":ratpack-gradle:publishAllPublicationsToProjectLocalRepository" // used in gradle snippets
   apiModules.each {
-    inputs.files apiModules.sourceSets.main.allSource
-    inputs.files project(":ratpack-gradle").sourceSets.main.allSource
+    inputs.files(apiModules.sourceSets.main.allSource)
+          .withPropertyName('apiModulesSource' + it.path)
+          .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files( project(":ratpack-gradle").sourceSets.main.allSource)
+          .withPropertyName('projectSource' + it.path)
+          .withPathSensitivity(PathSensitivity.RELATIVE)
   }
-  systemProperty "localRepo", rootProject.file("build/localrepo").absolutePath
   systemProperty "gradleUserHome", gradle.gradleUserHomeDir.absolutePath
   systemProperty "gradleHome", gradle.gradleHomeDir.absolutePath
 }
 
-//tasks.withType(Test).configureEach { t ->
-//  doFirst {
-//    t.systemProperties.forEach { key, val -> buildScan.value("${t.identityPath}#sysProps-$key", val.toString()) }
-//  }
-//}
+tasks.withType(Test).configureEach { t ->
+  doFirst {
+    println rootProject.file("build/localrepo").toString()
+    t.systemProperties.forEach { key, val -> buildScan.value("${t.identityPath}#sysProps-$key", val.toString()) }
+  }
+}
 
 task checkApi(type: Checkstyle) {
   group "manual"

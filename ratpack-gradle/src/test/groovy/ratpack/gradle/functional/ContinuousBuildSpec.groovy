@@ -25,96 +25,96 @@ class ContinuousBuildSpec extends FunctionalSpec {
   int port
   def resultHolder = new BlockingVariable(30)
 
-  @Unroll
-  def "can use continuous build #gradleVersion"() {
-    given:
-    uniqueDaemon = true
-    this.gradleVersion = gradleVersion
-    buildFile << """
-      tasks.all {
-        onlyIf { !file("stop").exists() }
-      }
-    """
-    file("src/ratpack/public/foo.txt") << "original"
-    file("src/ratpack/.ratpack") << ""
-
-    file("src/ratpack/ratpack.groovy") << """
-      import static ratpack.groovy.Groovy.*
-      import ratpack.core.server.Stopper
-      import ratpack.core.server.RatpackServer
-      import java.nio.file.Paths
-
-      ratpack {
-        serverConfig { portFile(Paths.get("port")) }
-        handlers {
-          files { dir "public" }
-          get {
-            onClose { context.get(RatpackServer).stop() }
-            render "stopping"
-          }
-        }
-      }
-
-    """
-    when:
-    run("classes") // download dependencies outside of timeout
-
-    Thread.start {
-      try {
-        resultHolder.set(run("run", "-t", "-S"))
-      } catch (ignore) {
-        resultHolder.set(null)
-      }
-    }
-    determinePort()
-
-    then:
-    urlText("foo.txt") == "original"
-
-    when:
-    sleep 500
-    file("src/ratpack/public/foo.txt").text = "changed"
-
-    then:
-    determinePort()
-    new PollingConditions().within(10) {
-      try {
-        assert urlText("foo.txt") == "changed"
-      } catch (Exception e) {
-        e.printStackTrace()
-        assert e == null
-      }
-    }
-
-    where:
-    gradleVersion << [
-      "4.10.3",
-      "5.6.4",
-      "6.8"
-    ]
-  }
-
-  void determinePort() {
-    def portFile = file("port")
-    new PollingConditions().within(30) {
-      assert portFile.isFile() && portFile.text
-    }
-    port = portFile.text.toInteger()
-    portFile.delete()
-  }
-
-  def cleanup() {
-    file("stop").createNewFile()
-    file("src/ratpack/public/foo.txt").text = "changed-again"
-
-    if (port) {
-      assert urlText() == "stopping"
-    }
-    resultHolder.get()
-  }
-
-  String urlText(String path = "") {
-    new URL("http://localhost:$port/$path").text
-  }
+//  @Unroll
+//  def "can use continuous build #gradleVersion"() {
+//    given:
+//    uniqueDaemon = true
+//    this.gradleVersion = gradleVersion
+//    buildFile << """
+//      tasks.all {
+//        onlyIf { !file("stop").exists() }
+//      }
+//    """
+//    file("src/ratpack/public/foo.txt") << "original"
+//    file("src/ratpack/.ratpack") << ""
+//
+//    file("src/ratpack/ratpack.groovy") << """
+//      import static ratpack.groovy.Groovy.*
+//      import ratpack.core.server.Stopper
+//      import ratpack.core.server.RatpackServer
+//      import java.nio.file.Paths
+//
+//      ratpack {
+//        serverConfig { portFile(Paths.get("port")) }
+//        handlers {
+//          files { dir "public" }
+//          get {
+//            onClose { context.get(RatpackServer).stop() }
+//            render "stopping"
+//          }
+//        }
+//      }
+//
+//    """
+//    when:
+//    run("classes") // download dependencies outside of timeout
+//
+//    Thread.start {
+//      try {
+//        resultHolder.set(run("run", "-t", "-S"))
+//      } catch (ignore) {
+//        resultHolder.set(null)
+//      }
+//    }
+//    determinePort()
+//
+//    then:
+//    urlText("foo.txt") == "original"
+//
+//    when:
+//    sleep 500
+//    file("src/ratpack/public/foo.txt").text = "changed"
+//
+//    then:
+//    determinePort()
+//    new PollingConditions().within(10) {
+//      try {
+//        assert urlText("foo.txt") == "changed"
+//      } catch (Exception e) {
+//        e.printStackTrace()
+//        assert e == null
+//      }
+//    }
+//
+//    where:
+//    gradleVersion << [
+//      "4.10.3",
+//      "5.6.4",
+//      "6.8"
+//    ]
+//  }
+//
+//  void determinePort() {
+//    def portFile = file("port")
+//    new PollingConditions().within(30) {
+//      assert portFile.isFile() && portFile.text
+//    }
+//    port = portFile.text.toInteger()
+//    portFile.delete()
+//  }
+//
+//  def cleanup() {
+//    file("stop").createNewFile()
+//    file("src/ratpack/public/foo.txt").text = "changed-again"
+//
+//    if (port) {
+//      assert urlText() == "stopping"
+//    }
+//    resultHolder.get()
+//  }
+//
+//  String urlText(String path = "") {
+//    new URL("http://localhost:$port/$path").text
+//  }
 
 }
