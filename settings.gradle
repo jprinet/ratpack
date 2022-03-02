@@ -71,17 +71,24 @@ def setBuildFile(project) {
 
 setBuildFile(rootProject)
 
+gradleEnterprise {
+  server = "https://ge.solutions-team.gradle.com"
+  buildScan {
+    captureTaskInputFiles = true
+    uploadInBackground = System.getenv("CI") == null
+    publishAlways()
+  }
+}
+
 buildCache {
+  local { enabled = false }
   remote(HttpBuildCache) {
-    url = 'https://ge.ratpack.io/cache/'
-    def cacheUsername = System.getenv('GRADLE_ENTERPRISE_CACHE_USERNAME')
-    def cachePassword = System.getenv('GRADLE_ENTERPRISE_CACHE_PASSWORD')
-    if (cacheUsername && cachePassword) {
-      push = true
-      credentials {
-        username = cacheUsername
-        password = cachePassword
-      }
+    enabled = true
+    url = 'https://cache-node-solutions.grdev.net/cache/'
+    push = System.getenv("CI") != null
+    credentials {
+      username = System.getenv("GRADLE_ENTERPRISE_CACHE_USERNAME")
+      password = System.getenv("GRADLE_ENTERPRISE_CACHE_PASSWORD")
     }
   }
 }
