@@ -37,6 +37,10 @@ class WriteTestConfig extends DefaultTask {
 
   @TaskAction
   def generate() {
-    testConfigPropertiesFile.withOutputStream { testProperties.store(it, null) }
+    Set<String> keys = testProperties.stringPropertyNames().sort();
+    testConfigPropertiesFile.write('# Test properties\n')
+    for (def key : keys) {
+      testConfigPropertiesFile.append(key + "=" + testProperties.getProperty(key) + "\n")
+    }
   }
 }
