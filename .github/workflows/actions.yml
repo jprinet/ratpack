@@ -18,4 +18,4 @@ jobs:
       - name: Run Gradle build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: clean build jacocoReport -x:ratpack-core:test -x:ratpack-exec:test -PjacocoReport -Dscan.tag.exp4
+          arguments: clean build -x:ratpack-core:test -x:ratpack-exec:test -x:ratpack-site:test -PjacocoReport -Dscan.tag.exp4
