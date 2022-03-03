@@ -84,7 +84,7 @@ buildCache {
   local { enabled = false }
   remote(HttpBuildCache) {
     enabled = true
-    url = 'https://cache-node-solutions.grdev.net/cache/'
+    url = 'https://cache-node-solutions.grdev.net/cache/exp5-1/'
     push = System.getenv("CI") != null
     credentials {
       username = System.getenv("GRADLE_ENTERPRISE_CACHE_USERNAME")
