@@ -106,7 +106,7 @@ task configureApi() {
             packages << ((it.absolutePath - root.absolutePath) - "/").replaceAll("/", ".")
           }
         }
-        options.group it.name, packages
+        options.group it.name, packages.sort()
       }
     }
   }
@@ -153,7 +153,10 @@ task api(type: Javadoc) {
       }
     }
   }
+
   doLast {
+    buildScan.value("options.groups", options.groups.toString())
+
     def replacementString = additionalAssets.replaceAll(Pattern.quote("{@docRoot}/"), "") + "</html>"
     ["allclasses.html"].each {
       def f = new File(destinationDir, it)
@@ -172,20 +175,23 @@ task api(type: Javadoc) {
 class TestEnvironmentProvider implements CommandLineArgumentProvider {
   @Internal
   def project
+  @Internal
+  def gradle
 
-  TestEnvironmentProvider(project){
+  TestEnvironmentProvider(gradle,project){
+    this.gradle = gradle
     this.project = project
   }
 
   @Override
   Iterable<String> asArguments() {
-    ["-DlocalRepo=" + project.file("build/localrepo")]
+    ["-DlocalRepo=" + project.file("build/localrepo"), "-DgradleUserHome" + gradle.gradleUserHomeDir.absolutePath, "-DgradleHome" + gradle.gradleHomeDir.absolutePath]
   }
 }
 
 tasks.named('test') {
   jvmArgumentProviders.add(
-    new TestEnvironmentProvider(rootProject)
+    new TestEnvironmentProvider(gradle, rootProject)
   )
 }
 
@@ -198,15 +204,6 @@ test {
     inputs.files( project(":ratpack-gradle").sourceSets.main.allSource)
           .withPropertyName('projectSource' + it.path)
           .withPathSensitivity(PathSensitivity.RELATIVE)
-  }
-  systemProperty "gradleUserHome", gradle.gradleUserHomeDir.absolutePath
-  systemProperty "gradleHome", gradle.gradleHomeDir.absolutePath
-}
-
-tasks.withType(Test).configureEach { t ->
-  doFirst {
-    println rootProject.file("build/localrepo").toString()
-    t.systemProperties.forEach { key, val -> buildScan.value("${t.identityPath}#sysProps-$key", val.toString()) }
   }
 }
 

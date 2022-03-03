@@ -34,6 +34,8 @@ plugins.withType(GroovyBasePlugin).configureEach {
       source sourceSet.allGroovy
       classpath = sourceSet.compileClasspath
       reports.xml.destination = new File(checkstyle.reportsDir, "${sourceSet.name}-groovy.xml")
+
+      exclude "**/*.zip", "**/overview-summary.html"
     }
   }
 }
